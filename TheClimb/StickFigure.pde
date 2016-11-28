@@ -1,8 +1,7 @@
-// processing-java --sketch=c:\git\sketches\TheClimb --output=c:\git\sketches\TheClimbJava --build
 
 /**
  * Each of a StickPuppet's joints is represented by a Vertex in a tree.
- * The tree structure means that each Vertex has a well parent and children.
+ * The tree structure means that each Vertex has a parent and children.
  * The parent will be null for the root Vertex.
  * The children will be empty for a leaf Vertex.
  */
