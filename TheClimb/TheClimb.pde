@@ -3,7 +3,7 @@
 // and bRunAnimation while working in this way
 boolean bWorkOnAnimation = false;
 boolean bRunAnimation = true;
-boolean bRecord = true;
+boolean bRecord = false;
 
 PImage background;
 Poses poses;

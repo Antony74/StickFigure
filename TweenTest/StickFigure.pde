@@ -1,41 +1,84 @@
 
+/**
+ * Each of a StickPuppet's joints is represented by a vertex in a tree.
+ * The tree structure means that each vertex has a parent and children.
+ * The parent will be null for the root vertex.
+ * The children will be empty for a leaf vertex.
+ */
+
 class Vertex {
 
-  // Generic tree-vertex member variables
+  /**
+   * An integer which is unique to this vertex.
+   * Typically an index in an ArrayList<Vertex>
+   * @see StickPuppet#vertices
+   */
   int index;
+
+  /***
+   * Our parent vertex.  The parent will be null if we are the root vertex.
+   */
   Vertex parent;
+  
+  /***
+   * Any child vertices.  Will be empty if we are a leaf vertex.
+   */
   ArrayList<Vertex> children;
 
-  // StickFigure specific member variables
+  /**
+   * The distance from this vertex to our parent vertex
+   */
   float magnitude;
+
+  /**
+   * The direction of our parent vertex from this vertex
+   */
   float heading;
-  
+
+  /**
+   * The points you drag around with your mouse to manipulate the StickPuppet - sometimes called lugs, handles or pivots.
+   * This variable defines how big each point is.
+   */
   static final float pointSize = 10;
 
+  /**
+   * @param _index The unique index of the vertex we are creating
+   */
   Vertex(int _index) {
     index = _index;
     children = new ArrayList<Vertex>();
   }
 
+  /**
+   * @param child The child vertex we are adding
+   */
   void addChild(Vertex child) {
     child.parent = this;
     children.add(child);
   }
 
-  // We have defined a tree model.  Now define some recursive functions which take advantage of it 
-
+  /**
+   * Calculate our position from the position of our parent
+   * @param pvParent PVector representing the position of our parent
+   * @return         Our position
+   */
   PVector getVector(PVector pvParent) {
     
-    PVector pv = pvParent.copy();
+    PVector pv = pvParent.get();
     
     if (parent != null) {
-      PVector pvRelative = PVector.fromAngle(heading).mult(magnitude);
+      PVector pvRelative = PVector.fromAngle(heading);
+      pvRelative.mult(magnitude);
       pv.sub(pvRelative);
     }
     
     return pv;
   }
 
+  /**
+   * Draw a line to our parent vertex, then recursively call our children so that all lines between vertices are drawn.
+   * @param pvParent PVector representing the position of our parent
+   */
   void draw(PVector pvParent) {
 
     PVector pv = getVector(pvParent);
@@ -48,6 +91,11 @@ class Vertex {
     }
   }
 
+  /**
+   * The points you drag around with your mouse to manipulate the StickPuppet - sometimes called lugs, handles or pivots.
+   * This draws one at our location, then recursively calls our children so that all points are drawn.
+   * @param pvParent PVector representing the position of our parent
+   */
   void drawPoints(PVector pvParent) {
 
     PVector pv = getVector(pvParent);
@@ -60,6 +108,10 @@ class Vertex {
     }
   }
 
+  /**
+   * Rotate this vertex around its parent.  Then call our children recursively so that they rotate with us
+   * @param angle The amount to rotate by
+   */
   void rotate(float angle) {
 
     // Update heading - to do this the angle needs to be expressed within the range -PI to PI
@@ -165,16 +217,80 @@ class Vertex {
   }
 };
 
-//
-// StickFigure
-//
-class StickFigure {
-  
+/**
+ * I will write something about the StickPuppet class here
+ */
+class StickPuppet {
+
   float size;
   int currentDrag = -1;
 
   PVector pv;
   ArrayList<Vertex> vertices;
+
+  void drawPoints() {
+    
+    pushStyle();
+    rectMode(RADIUS);
+    noStroke();
+    fill(255,0,0,128);
+
+    vertices.get(0).drawPoints(pv);
+    
+    popStyle();
+  }
+
+  boolean mousePressed() {
+
+    currentDrag = vertices.get(0).hitTest(pv);
+
+    return (currentDrag != -1);
+  }
+
+  boolean mouseReleased() {
+    if (currentDrag == -1) {
+      return false;
+    } else {
+      currentDrag = -1;
+      return true;
+    }
+  }
+
+  boolean mouseDragged() {
+
+    if (currentDrag >= 0) {
+
+      if (currentDrag == 0) {
+        
+        pv.set(mouseX, mouseY);
+
+      } else {
+
+        vertices.get(0).mouseDragged(currentDrag, pv);
+      }
+      
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  void tween(float t, StickFigure a, StickFigure b) {
+
+    float x = map(t, 0, 1, a.pv.x, b.pv.x);
+    float y = map(t, 0, 1, a.pv.y, b.pv.y);
+    pv.set(x, y);
+
+    vertices.get(0).tween(t, a.vertices.get(0), b.vertices.get(0));
+
+  }
+
+};
+
+/**
+ * I will write something about the StickFigure class here
+ */
+class StickFigure extends StickPuppet {
 
   static final int PELVIS = 0;
   static final int LEFT_KNEE = 1;
@@ -305,71 +421,23 @@ class StickFigure {
     popStyle();
 
     // Use this kind of trick if you need to be able to tell one limb from the other
- /*
+/*
     if (alpha(g.strokeColor) == 255) {
       pushStyle();
       stroke(0, 255, 255);
-      vertices.get(LEFT_KNEE).draw();
+      vertices.get(LEFT_KNEE).draw(pv);
       popStyle();
     }
 */
+  }
+
+  void setSize(int _size) {
+    size = _size;
+
+    for (int n = 0; n < vertices.size(); ++n) {
+      vertices.get(n).magnitude = size;
+    }
 }
-
-  void drawPoints() {
-    
-    pushStyle();
-    rectMode(RADIUS);
-    noStroke();
-
-    pelvis().drawPoints(pv);
-    
-    popStyle();
-  }
-
-  boolean mousePressed() {
-
-    currentDrag = pelvis().hitTest(pv);
-
-    return (currentDrag != -1);
-  }
-
-  boolean mouseReleased() {
-    if (currentDrag == -1) {
-      return false;
-    } else {
-      currentDrag = -1;
-      return true;
-    }
-  }
-
-  boolean mouseDragged() {
-
-    if (currentDrag >= 0) {
-
-      if (currentDrag == 0) {
-        
-        pv.set(mouseX, mouseY);
-
-      } else {
-
-        pelvis().mouseDragged(currentDrag, pv);
-      }
-      
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  void tween(float t, StickFigure a, StickFigure b) {
-
-    float x = map(t, 0, 1, a.pv.x, b.pv.x);
-    float y = map(t, 0, 1, a.pv.y, b.pv.y);
-    pv.set(x, y);
-
-    vertices.get(PELVIS).tween(t, a.vertices.get(PELVIS), b.vertices.get(PELVIS));
-
-  }
 
   StickFigure copy() {
     
@@ -402,25 +470,29 @@ class StickFigure {
     String line = "    new PVector(" + pv.x + ", " + pv.y + ")" + lineEnding;
     printlnWithComment(line, comment);
   }
-/*  
+  
+  void printAngle(float angle, String lineEnding, String comment) {
+    String line = "    " + angle + lineEnding;
+    printlnWithComment(line, comment);
+  }
+
   void print() {
     println("sequence.add(new StickFigure(");
     printlnWithComment("    " + size + ",", "Size");
-
-    printVector(pelvis(),     ",",  "Pelvis");
-    printVector(leftKnee(),   ",",  "Left knee");
-    printVector(rightKnee(),  ",",  "Right knee");
-    printVector(leftFoot(),   ",",  "Left foot");
-    printVector(rightFoot(),  ",",  "Right foot");
-    printVector(chest(),      ",",  "Chest");
-    printVector(neck(),       ",",  "Neck");
-    printVector(head(),       ",",  "Head");
-    printVector(leftElbow(),  ",",  "Left elbow");
-    printVector(rightElbow(), ",",  "Right elbow");
-    printVector(leftHand(),   ",",  "Left hand");
-    printVector(rightHand(),  "));", "Right hand");
+    printVector(pv,                  ",",   "Pelvis position");
+    printAngle(leftKnee().heading,   ",",   "Left knee (direction of pelvis)");
+    printAngle(rightKnee().heading,  ",",   "Right knee (direction of pelvis)");
+    printAngle(leftFoot().heading,   ",",   "Left foot (direction of left knee)");
+    printAngle(rightFoot().heading,  ",",   "Right foot (direction of right knee)");
+    printAngle(chest().heading,      ",",   "Chest (direction of pelvis)");
+    printAngle(neck().heading,       ",",   "Neck (direction of chest)");
+    printAngle(head().heading,       ",",   "Head (direction of neck");
+    printAngle(leftElbow().heading,  ",",   "Left elbow (direction of neck)");
+    printAngle(rightElbow().heading, ",",   "Right elbow (direction of neck)");
+    printAngle(leftHand().heading,   ",",   "Left hand (direction of left elbow)");
+    printAngle(rightHand().heading,  "));", "Right hand (direction of right elbow)");
 
     println("");
   }
-*/
+
 };

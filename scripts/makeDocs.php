@@ -10,6 +10,7 @@
 //
 
 include 'config.php';
+include 'makeJSSketches.php';
 
 //
 // Build sketch
@@ -73,10 +74,6 @@ exec( 'javadoc -private -nodeprecatedlist -nohelp -noqualifier all -d ../docs ' 
 // Remove the string "(package private)" from all generated html files
 // Everything in Processing is public
 //
-
-function endsWith( $str, $sub ) {
-   return ( substr( $str, strlen( $str ) - strlen( $sub ) ) === $sub );
-}
 
 $dir = scandir('../docs');
 
