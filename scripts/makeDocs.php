@@ -1,19 +1,25 @@
 <?php
 
 //
-// javadoc.php - generates the StickFigure help
+// makeDocs.php - generates the StickFigure help and in-browser (ProcessingJS) versions of sketches
 //
 // The configuration settings in config.php will require attention before
 // you are able to run this script successfully.
 //
-// usage:  php javadoc.php
+// usage:  php makeDocs.php
 //
 
 include 'config.php';
 
-$baseDir = realPath(dirname(__FILE__) . '/../') . DIRECTORY_SEPARATOR;
+//
+// Build sketch
+//
 
-exec( $processingJavaPaths[0] . ' --force --sketch=' . $baseDir . $namesOfSketches[0] . ' --output=' . $baseDir . 'JavaDoc --build',
+$baseDir = realPath(dirname(__FILE__) . '/../') . DIRECTORY_SEPARATOR;
+$sketchName = $namesOfSketches[0];
+$sketchDir = $baseDir . $sketchName . DIRECTORY_SEPARATOR;
+
+exec( $processingJavaPaths[0] . ' --force --sketch=' . $sketchDir . ' --output=' . $sketchDir . '/build --build',
       $output,
       $nReturnCode);
 
@@ -21,35 +27,70 @@ if ($nReturnCode !== 0) {
     exit($nReturnCode);
 }
 
-$process = proc_open( 'javadoc -private ' . $baseDir . 'JavaDoc/source/' . $namesOfSketches[0] . '.java',
-                      Array(),
-                      $pipes,
-                      $baseDir . 'JavaDoc/source/');
+//
+// getLine
+//
 
-$nReturnCode = proc_close($process);
+function getLine($lines, $nLine, $needle) {
 
-if ($nReturnCode !== 0) {
-    exit($nReturnCode);
+    while($nLine < count($lines)) {
+        
+        if ($lines[$nLine] === $needle) {
+            return $nLine;
+        }
+
+        ++$nLine;
+    }
+
+    exit("Expected line not found");
+} 
+
+//
+// Break the just the three StickFigure.pde classes
+//
+
+$javaFilename = $sketchDir . 'build/source/' . $sketchName . '.java';
+
+$java = file_get_contents($javaFilename);
+
+$lines = explode("\n", $java); 
+
+$nStart = getLine($lines, 0, '/**');
+$nEnd = getLine($lines, $nStart, '};');
+$nEnd = getLine($lines, $nEnd + 1, '};');
+$nEnd = getLine($lines, $nEnd + 1, '};');
+
+$lines = array_slice($lines, $nStart, $nEnd - $nStart + 1);
+$java = "import java.util.ArrayList;\n" . implode("\n", $lines);
+
+file_put_contents($javaFilename, $java);
+
+exec( 'javadoc -private -nodeprecatedlist -nohelp -noqualifier all -d ../docs ' . $javaFilename,
+      $output,
+      $nReturnCode);
+
+//
+// Remove the string "(package private)" from all generated html files
+// Everything in Processing is public
+//
+
+function endsWith( $str, $sub ) {
+   return ( substr( $str, strlen( $str ) - strlen( $sub ) ) === $sub );
 }
 
-processClass("Vertex");
-processClass("StickPuppet");
-processClass("StickFigure");
+$dir = scandir('../docs');
 
-function processClass($sName)
+for ($n = 0; $n < count($dir); ++$n)
 {
-    global $baseDir, $namesOfSketches, $webBrowserPaths;
+    $sFile = '../docs/' . $dir[$n];
 
-    $sFilename = $baseDir . 'JavaDoc/source/' . $namesOfSketches[0] . '.' . $sName . '.html';
+    if (endsWith($sFile, '.html')) {
+        echo($sFile . "\n");
 
-    $sDoc = file_get_contents($sFilename);
-    $sDoc = explode('<!-- ======== START OF CLASS DATA ======== -->', $sDoc)[1];
-    $sDoc = explode('<!-- ========= END OF CLASS DATA ========= -->', $sDoc)[0];
-
-    file_put_contents($sFilename, $sDoc);
-
-//    $cmd = 'start "' . $webBrowserPaths[0] . '" ' . $baseDir . 'JavaDoc/source/' . $sName . '.html';
-//    exec(str_replace('/', DIRECTORY_SEPARATOR, $cmd));
+        $html = file_get_contents($sFile);
+        $html = str_replace("(package private) ", "", $html);
+        file_put_contents($sFile, $html);
+    }
 }
 
 ?>

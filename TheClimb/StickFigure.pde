@@ -216,9 +216,9 @@ class Vertex {
   }
 };
 
-//
-// StickPuppet
-//
+/**
+ * I will write something about the StickPuppet class here
+ */
 class StickPuppet {
 
   float size;
@@ -286,9 +286,9 @@ class StickPuppet {
 
 };
 
-//
-// StickFigure
-//
+/**
+ * I will write something about the StickFigure class here
+ */
 class StickFigure extends StickPuppet {
 
   static final int PELVIS = 0;
