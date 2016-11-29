@@ -1,36 +1,67 @@
 
 /**
- * Each of a StickPuppet's joints is represented by a Vertex in a tree.
- * The tree structure means that each Vertex has a parent and children.
- * The parent will be null for the root Vertex.
- * The children will be empty for a leaf Vertex.
+ * Each of a StickPuppet's joints is represented by a vertex in a tree.
+ * The tree structure means that each vertex has a parent and children.
+ * The parent will be null for the root vertex.
+ * The children will be empty for a leaf vertex.
  */
 
 class Vertex {
 
-  // Generic tree-vertex member variables
+  /**
+   * An integer which is unique to this vertex.
+   * Typically an index in an ArrayList<Vertex>
+   * @see StickPuppet#vertices
+   */
   int index;
+
+  /***
+   * Our parent vertex.  The parent will be null if we are the root vertex.
+   */
   Vertex parent;
+  
+  /***
+   * Any child vertices.  Will be empty if we are a leaf vertex.
+   */
   ArrayList<Vertex> children;
 
-  // StickFigure specific member variables
+  /**
+   * The distance from this vertex to our parent vertex
+   */
   float magnitude;
+
+  /**
+   * The direction of our parent vertex from this vertex
+   */
   float heading;
-  
+
+  /**
+   * The points you drag around with your mouse to manipulate the StickPuppet - sometimes called lugs, handles or pivots.
+   * This variable defines how big each point is.
+   */
   static final float pointSize = 10;
 
+  /**
+   * @param _index The unique index of the vertex we are creating
+   */
   Vertex(int _index) {
     index = _index;
     children = new ArrayList<Vertex>();
   }
 
+  /**
+   * @param child The child vertex we are adding
+   */
   void addChild(Vertex child) {
     child.parent = this;
     children.add(child);
   }
 
-  // We have defined a tree model.  Now define some recursive functions which take advantage of it 
-
+  /**
+   * Calculate our position from the position of our parent
+   * @param pvParent PVector representing the position of our parent
+   * @return         Our position
+   */
   PVector getVector(PVector pvParent) {
     
     PVector pv = pvParent.copy();
@@ -43,6 +74,10 @@ class Vertex {
     return pv;
   }
 
+  /**
+   * Draw a line to our parent vertex, then recursively call our children so that all lines between vertices are drawn.
+   * @param pvParent PVector representing the position of our parent
+   */
   void draw(PVector pvParent) {
 
     PVector pv = getVector(pvParent);
@@ -55,6 +90,11 @@ class Vertex {
     }
   }
 
+  /**
+   * The points you drag around with your mouse to manipulate the StickPuppet - sometimes called lugs, handles or pivots.
+   * This draws one at our location, then recursively calls our children so that all points are drawn.
+   * @param pvParent PVector representing the position of our parent
+   */
   void drawPoints(PVector pvParent) {
 
     PVector pv = getVector(pvParent);
@@ -67,6 +107,10 @@ class Vertex {
     }
   }
 
+  /**
+   * Rotate this vertex around its parent.  Then call our children recursively so that they rotate with us
+   * @param angle The amount to rotate by
+   */
   void rotate(float angle) {
 
     // Update heading - to do this the angle needs to be expressed within the range -PI to PI
