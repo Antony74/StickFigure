@@ -1,6 +1,6 @@
 # The Climb
 
-This was my week 2 homework for FutureLearn's [Explore Animation](<https://www.futurelearn.com/courses/explore-animation>) course.
+This was my week 2 homework for FutureLearn's [Explore Animation](<https://www.futurelearn.com/courses/explore-animation>) course:  Create an animation in which two stick figures enter the scene, interact in some simple way, then leave.
 
 It's not the worse animation you'll ever see, but you can probably do better!
 
