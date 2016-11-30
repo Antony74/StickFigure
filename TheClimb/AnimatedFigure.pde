@@ -175,16 +175,14 @@ class AnimatedFigure {
         prevFigure.pv.set(prevKeyFrame.x, prevKeyFrame.y);
         nextFigure.pv.set(nextKeyFrame.x, nextKeyFrame.y);
 
-        float tween = 0;
-        
+        StickFigure figure = new StickFigure(prevFigure.size);
+
         if ( prevKeyFrame.nFrame == nextKeyFrame.nFrame) {
-          tween = 0.5; // Any value, doesn't matter
+          figure = prevFigure.copy();
         } else {
-          tween = map(nFrame, prevKeyFrame.nFrame, nextKeyFrame.nFrame, 0, 1);
+          figure.tween(nFrame, prevKeyFrame.nFrame, nextKeyFrame.nFrame, prevFigure, nextFigure);
         }
 
-        StickFigure figure = new StickFigure(prevFigure.size);
-        figure.tween(tween, prevFigure, nextFigure);
         figure.draw();
         break;
       }

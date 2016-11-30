@@ -26,23 +26,22 @@ class Vertex {
   ArrayList<Vertex> children;
 
   /**
-   * The distance from this vertex to our parent vertex
+   * The distance from this vertex to our parent vertex.
    */
   float magnitude;
 
   /**
-   * The direction of our parent vertex from this vertex
+   * The direction of our parent vertex from this vertex.
    */
   float heading;
 
   /**
-   * The points you drag around with your mouse to manipulate the StickPuppet - sometimes called lugs, handles or pivots.
-   * This variable defines how big each point is.
+   * How big the points you drag around with your mouse to manipulate the StickPuppet are (sometimes called lugs, handles or pivots).
    */
   static final float pointSize = 10;
 
   /**
-   * @param _index The unique index of the vertex we are creating
+   * @param _index The unique index of the vertex we are creating.
    */
   Vertex(int _index) {
     index = _index;
@@ -50,6 +49,7 @@ class Vertex {
   }
 
   /**
+   * Adds a child vertex to this vertex
    * @param child The child vertex we are adding
    */
   void addChild(Vertex child) {
@@ -58,7 +58,7 @@ class Vertex {
   }
 
   /**
-   * Calculate our position from the position of our parent
+   * Calculate's the position of this vertex from the position of its parent vertex.
    * @param pvParent PVector representing the position of our parent
    * @return         Our position
    */
@@ -92,8 +92,8 @@ class Vertex {
   }
 
   /**
-   * The points you drag around with your mouse to manipulate the StickPuppet - sometimes called lugs, handles or pivots.
-   * This draws one at our location, then recursively calls our children so that all points are drawn.
+   * Draw a point at our present location (to show we can be dragged around with the mouse to manipulate the StickPuppet).
+   * Then recursively calls our children so that all points are drawn.
    * @param pvParent PVector representing the position of our parent
    */
   void drawPoints(PVector pvParent) {
@@ -109,7 +109,8 @@ class Vertex {
   }
 
   /**
-   * Rotate this vertex around its parent.  Then call our children recursively so that they rotate with us
+   * Rotate this vertex around its parent.  Then call our children recursively so that they rotate with
+   * us (thus staying in the same position with respect to us).
    * @param angle The amount to rotate by
    */
   void rotate(float angle) {
@@ -131,7 +132,18 @@ class Vertex {
     }
   }
 
-  void tween(float t, Vertex parentA, Vertex parentB) {
+  /**
+   * Calculate the direction of our parent vertex as somewhere in between the directions of the two given vertices.
+   * Then call our children recursively so they get tweened too.
+   * The parameters are based on Processing's <A href="https://processing.org/reference/map_.html" target="_top">map()</A>
+   * function - in fact the only difference should be that we are not mapping to floats we are mapping to vertices.
+   * @param value The incoming value to be converted
+   * @param start The lower bound of the value's current range
+   * @param stop The upper bound of the value's current range
+   * @param parentA The desired vertex's lower bound
+   * @param parentB The desired vertex's upper bound
+   */
+  void tween(float value, float start, float stop, Vertex parentA, Vertex parentB) {
 
     if (children.size() != parentA.children.size() || children.size() != parentB.children.size()) {
       println("Can't tween, trees differ");
@@ -143,16 +155,21 @@ class Vertex {
       Vertex b = parentB.children.get(n);
       Vertex c = children.get(n);
       
-      float heading = map(t, 0, 1, a.heading, b.heading);
+      float heading = map(value, start, stop, a.heading, b.heading);
       
       float angle = heading - c.heading;
     
       c.rotate(angle);
-      c.tween(t, a, b);
+      c.tween(value, start, stop, a, b);
     }
 
   }
 
+  /**
+   * Called to determine which vertex, if any, the mouse is currently over.  If the mouse is not over this particular vertex, then our children are called recursively so they get hit tested too.
+   * @param pvParent The position of our parent vertex
+   * @return The index of the vertex the mouse is over, or -1 if the mouse is not currently over any vertex
+   */
   int hitTest(PVector pvParent) {
 
     PVector pv = getVector(pvParent);
@@ -174,6 +191,12 @@ class Vertex {
     return -1;
   }
 
+  /**
+   * If this vertex is being dragged by the mouse then rotate appropriately in order to follow the mouse,
+   * otherwise call our children recursively in case one of them is being dragged.
+   * @param currentDrag The index of the vertex which is currently being dragged
+   * @param pvParent The position of our parent vertex
+   */
   void mouseDragged(int currentDrag, PVector pvParent) {
     
     PVector pv = getVector(pvParent);
@@ -195,6 +218,12 @@ class Vertex {
 
   }
 
+  /**
+   * Called to determine a particular vertex's x-y location.  If this isn't the desired vertex then our children are called recursively so it can be located.
+   * @param desiredIndex The index of the vertex who's location we wish to determine
+   * @param pvParent The position of our parent vertex
+   * @return The x-y location of the desired vertex, or null if that vertex cannot be located on this branch of the tree.
+   */
   PVector getChildVector(int desiredIndex, PVector pvParent) {
     PVector pv = getVector(pvParent);
     
@@ -275,13 +304,13 @@ class StickPuppet {
     }
   }
 
-  void tween(float t, StickFigure a, StickFigure b) {
+  void tween(float value, float start, float stop, StickFigure a, StickFigure b) {
 
-    float x = map(t, 0, 1, a.pv.x, b.pv.x);
-    float y = map(t, 0, 1, a.pv.y, b.pv.y);
+    float x = map(value, start, stop, a.pv.x, b.pv.x);
+    float y = map(value, start, stop, a.pv.y, b.pv.y);
     pv.set(x, y);
 
-    vertices.get(0).tween(t, a.vertices.get(0), b.vertices.get(0));
+    vertices.get(0).tween(value, start, stop, a.vertices.get(0), b.vertices.get(0));
 
   }
 
