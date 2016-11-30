@@ -24,4 +24,4 @@ The three boolean flags at the top of this file control which mode the sketch is
 | ------------- | ------------------------------------------------------- |
 | bRunAnimation | Displays the finished animation |
 | bWorkOnAnimation | This is where I worked on the animation.  The stick figure can be posed by dragging points around.  Left and right arrows to move through the current sequence of poses.  N for a new pose.  P to print.  To help line up the next pose, the previous pose is shown as a half transparent 'onion skin'. |
-| bRecord | Don't switch this on until you're prepared for this directory to fill up with .png files of each consecutive frame!  Then use tools such as Processing's Movie Maker, [ImageMagick](https://www.imagemagick.org/) or ffmpeg to convert the frames into a video file or animated .gif |
+| bRecord | Don't switch this on until you're prepared for this directory to fill up with .png files of each consecutive frame!  Then use tools such as Processing's Movie Maker, [ImageMagick](https://www.imagemagick.org/) or [ffmpeg](https://www.ffmpeg.org/) to convert the frames into a video file or animated .gif |
