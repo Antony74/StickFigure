@@ -18,7 +18,8 @@ $webBrowserPaths = Array(
 
 $namesOfSketches = Array(
         "TheClimb",
-        "TweenTest");
+        "TweenTest",
+		"HelloWorld");
 
 ?>
 

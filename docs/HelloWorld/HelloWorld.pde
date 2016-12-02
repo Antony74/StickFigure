@@ -13,9 +13,10 @@ void setup() {
 
 void draw() {
   background(128);
-  stickFigure.rightHand().heading = (0.15 * sin(frameCount/15.0)) + 2; // Wave!
+  stickFigure.rightHand().heading = (0.25 * sin(frameCount/10.0)) + 2; // Wave!
   stickFigure.draw();
 }
+
 
 /**
  * Each of a StickPuppet's joints is represented by a vertex in a tree.
@@ -514,4 +515,3 @@ class StickFigure extends StickPuppet {
   }
 
 };
-
