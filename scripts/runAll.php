@@ -28,10 +28,11 @@ for ($nSketch = 0; $nSketch < count($namesOfSketches); ++$nSketch) {
 	$path = $baseDir . $sketchName . '/StickFigure.pde';
 
 	$code = file_get_contents($path);
+
 	array_push($arrStickFigure, $code);
 
 	if ($nSketch) {
-		if ($arrStickFigure[0] !== $arrStickFigure[n]) {
+		if ($arrStickFigure[0] !== $code) {
 			exit($path . ' differs.  Please reintegrate?');
 		}
 	}
