@@ -336,6 +336,15 @@ class StickPuppet {
   }
 
   /**
+   * Creates a parent-child relationship between two vertices, specified by array index.
+   * @param nChild  The array index of the child vertex in this new relationship
+   * @param nParent The array index of the parent vertex in this new relationship
+   */
+  void addChild(int nChild, int nParent) {
+    vertices.get(nParent).addChild(vertices.get(nChild));
+  }
+
+  /**
    * Sets this StickPuppet to a pose somewhere in between the two poses given.
    * The parameters are based on Processing's <A href="https://processing.org/reference/map_.html" target="_top">map()</A>
    * function - in fact the only difference should be that we are not mapping to floats we are mapping to StickPuppets.
@@ -533,6 +542,10 @@ class StickFigure extends StickPuppet {
     rightHand().heading  = rightHandHeading;
   }
 
+  /**
+   * Creates the stick figure's vertex tree, connecting up all the joints.
+   * Places it in a neutral pose in the middle of the sketch.
+   */
   void reset() {
 
     vertices = new ArrayList<Vertex>();
@@ -576,10 +589,9 @@ class StickFigure extends StickPuppet {
     pelvis().rotate(-HALF_PI);
   }
 
-  void addChild(int nVertex, int nParent) {
-    vertices.get(nParent).addChild(vertices.get(nVertex));
-  }
-
+  /**
+   * Draw the stick figure.  This is what to override or hack if you want to give it a makeover or a new wardrobe.
+   */
   void draw() {
 
     pelvis().draw(pv);
@@ -606,7 +618,12 @@ class StickFigure extends StickPuppet {
 */
   }
 
-  void setSize(int _size) {
+  /**
+   * Set the length of each of the StickFigure's segments to the same value.
+   * Thus setting the overall size of this stick figure.
+   * @param _size The new size of each stick figure segment
+   */
+  void setSize(float _size) {
     size = _size;
 
     for (int n = 0; n < vertices.size(); ++n) {
@@ -614,6 +631,10 @@ class StickFigure extends StickPuppet {
     }
 }
 
+  /**
+   * Create a copy of the stick figure.
+   * @return The copy
+   */
   StickFigure copy() {
     
     return new StickFigure(
@@ -632,6 +653,11 @@ class StickFigure extends StickPuppet {
                   vertices.get(RIGHT_HAND).heading); 
   }
 
+  /**
+   * Utility method for code generation.  Pad and print a line of code followed by a comment.
+   * @param line    The line of code
+   * @param comment The comment
+   */
   void printlnWithComment(String line, String comment) {
 
     while (line.length() < 41) {
@@ -641,16 +667,31 @@ class StickFigure extends StickPuppet {
     println(line + "// " + comment);
   }
   
+  /**
+   * Utility method for code generation.  Generate a line of code which creates a new PVector.
+   * @param pv         The PVector
+   * @param lineEnding Comma if there are more parameters to come, close bracket semi-colon if this is the last parameter
+   * @param comment    The comment
+   */
   void printVector(PVector pv, String lineEnding, String comment) {
     String line = "    new PVector(" + pv.x + ", " + pv.y + ")" + lineEnding;
     printlnWithComment(line, comment);
   }
   
+  /**
+   * Utility method for code generation.  Generate an angle parameter.
+   * @param angle      The angle
+   * @param lineEnding Comma if there are more parameters to come, close bracket semi-colon if this is the last parameter
+   * @param comment    The comment
+   */
   void printAngle(float angle, String lineEnding, String comment) {
     String line = "    " + angle + lineEnding;
     printlnWithComment(line, comment);
   }
 
+  /**
+   * "Save" the stick figure's current pose by generating code for it, which can then be pasted into your sketch.
+   */
   void print() {
     println("sequence.add(new StickFigure(");
     printlnWithComment("    " + size + ",", "Size");
