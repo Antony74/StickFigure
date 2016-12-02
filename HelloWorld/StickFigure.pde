@@ -10,7 +10,7 @@ class Vertex {
 
   /**
    * An integer which is unique to this vertex.
-   * Typically an index in an ArrayList<Vertex>
+   * Typically an index in an ArrayList&gt;Vertex&lt;
    * @see StickPuppet#vertices
    */
   int index;
@@ -26,23 +26,22 @@ class Vertex {
   ArrayList<Vertex> children;
 
   /**
-   * The distance from this vertex to our parent vertex
+   * The distance from this vertex to our parent vertex.
    */
   float magnitude;
 
   /**
-   * The direction of our parent vertex from this vertex
+   * The direction of our parent vertex from this vertex.
    */
   float heading;
 
   /**
-   * The points you drag around with your mouse to manipulate the StickPuppet - sometimes called lugs, handles or pivots.
-   * This variable defines how big each point is.
+   * How big the points you drag around with your mouse to manipulate the StickPuppet are (sometimes called lugs, handles or pivots).
    */
   static final float pointSize = 10;
 
   /**
-   * @param _index The unique index of the vertex we are creating
+   * @param _index The unique index of the vertex we are creating.
    */
   Vertex(int _index) {
     index = _index;
@@ -50,6 +49,7 @@ class Vertex {
   }
 
   /**
+   * Adds a child vertex to this vertex
    * @param child The child vertex we are adding
    */
   void addChild(Vertex child) {
@@ -58,7 +58,7 @@ class Vertex {
   }
 
   /**
-   * Calculate our position from the position of our parent
+   * Calculate's the position of this vertex from the position of its parent vertex.
    * @param pvParent PVector representing the position of our parent
    * @return         Our position
    */
@@ -92,8 +92,8 @@ class Vertex {
   }
 
   /**
-   * The points you drag around with your mouse to manipulate the StickPuppet - sometimes called lugs, handles or pivots.
-   * This draws one at our location, then recursively calls our children so that all points are drawn.
+   * Draw a point at our present location (to show we can be dragged around with the mouse to manipulate the StickPuppet).
+   * Then recursively calls our children so that all points are drawn.
    * @param pvParent PVector representing the position of our parent
    */
   void drawPoints(PVector pvParent) {
@@ -109,7 +109,8 @@ class Vertex {
   }
 
   /**
-   * Rotate this vertex around its parent.  Then call our children recursively so that they rotate with us
+   * Rotate this vertex around its parent.  Then call our children recursively so that they rotate with
+   * us (thus staying in the same position with respect to us).
    * @param angle The amount to rotate by
    */
   void rotate(float angle) {
@@ -131,7 +132,18 @@ class Vertex {
     }
   }
 
-  void tween(float t, Vertex parentA, Vertex parentB) {
+  /**
+   * Calculate the direction of our parent vertex as somewhere in between the directions of the two given vertices.
+   * Then call our children recursively so they get tweened too.
+   * The parameters are based on Processing's <A href="https://processing.org/reference/map_.html" target="_top">map()</A>
+   * function - in fact the only difference should be that we are not mapping to floats we are mapping to vertices.
+   * @param value The incoming value to be converted
+   * @param start The lower bound of the value's current range
+   * @param stop The upper bound of the value's current range
+   * @param parentA The desired vertex's lower bound
+   * @param parentB The desired vertex's upper bound
+   */
+  void tween(float value, float start, float stop, Vertex parentA, Vertex parentB) {
 
     if (children.size() != parentA.children.size() || children.size() != parentB.children.size()) {
       println("Can't tween, trees differ");
@@ -143,16 +155,21 @@ class Vertex {
       Vertex b = parentB.children.get(n);
       Vertex c = children.get(n);
       
-      float heading = map(t, 0, 1, a.heading, b.heading);
+      float heading = map(value, start, stop, a.heading, b.heading);
       
       float angle = heading - c.heading;
     
       c.rotate(angle);
-      c.tween(t, a, b);
+      c.tween(value, start, stop, a, b);
     }
 
   }
 
+  /**
+   * Called to determine which vertex, if any, the mouse is currently over.  If the mouse is not over this particular vertex, then our children are called recursively so they get hit tested too.
+   * @param pvParent The position of our parent vertex
+   * @return The index of the vertex the mouse is over, or -1 if the mouse is not currently over any vertex
+   */
   int hitTest(PVector pvParent) {
 
     PVector pv = getVector(pvParent);
@@ -174,6 +191,12 @@ class Vertex {
     return -1;
   }
 
+  /**
+   * If this vertex is being dragged by the mouse then rotate appropriately in order to follow the mouse,
+   * otherwise call our children recursively in case one of them is being dragged.
+   * @param currentDrag The index of the vertex which is currently being dragged
+   * @param pvParent The position of our parent vertex
+   */
   void mouseDragged(int currentDrag, PVector pvParent) {
     
     PVector pv = getVector(pvParent);
@@ -195,6 +218,12 @@ class Vertex {
 
   }
 
+  /**
+   * Called to determine a particular vertex's x-y location.  If this isn't the desired vertex then our children are called recursively so it can be located.
+   * @param desiredIndex The index of the vertex who's location we wish to determine
+   * @param pvParent The position of our parent vertex
+   * @return The x-y location of the desired vertex, or null if that vertex cannot be located on this branch of the tree.
+   */
   PVector getChildVector(int desiredIndex, PVector pvParent) {
     PVector pv = getVector(pvParent);
     
@@ -218,16 +247,32 @@ class Vertex {
 };
 
 /**
- * I will write something about the StickPuppet class here
+ * StickPuppet is the base-class for StickFigure, and could also be the base-class for anything non-humanoid you wanted to model
+ * in the same way (e.g. a dog, an octopus, a dragon...)
  */
 class StickPuppet {
 
-  float size;
+  /**
+   * The unique index of the vertex currently being mouse-dragged, or -1 if
+   * none of the vertices in this StickPuppet are currently being dragged.
+   */
   int currentDrag = -1;
 
+  /**
+   * Contains the x-y location within the sketch of where the StickPuppet's root vertex
+   * is (the StickFigure's root vertex is its PELVIS). 
+   */
   PVector pv;
+
+  /**
+   * Contains all the StickPuppet's vertices.  Note that the root vertex should be item zero in the ArrayList.
+   */
   ArrayList<Vertex> vertices;
 
+  /**
+   * Draws a point at each vertex so you can see what can be manipulated with the mouse
+   * (such "points" are also sometimes called lugs, handles or pivots).
+   */
   void drawPoints() {
     
     pushStyle();
@@ -240,6 +285,11 @@ class StickPuppet {
     popStyle();
   }
 
+  /**
+   * To make a StickPuppet mouse controlled, call its mousePressed, mouseReleased and mouseDragged
+   * functions from the Processing functions with the same name.
+   * @return true if the mousePressed event is relevant to the StickPuppet.  Otherwise false, and you can offer the event to some other object. 
+   */
   boolean mousePressed() {
 
     currentDrag = vertices.get(0).hitTest(pv);
@@ -247,6 +297,11 @@ class StickPuppet {
     return (currentDrag != -1);
   }
 
+  /**
+   * To make a StickPuppet mouse controlled, call its mousePressed, mouseReleased and mouseDragged
+   * functions from the Processing functions with the same name.
+   * @return true if the mouseReleased event is relevant to the StickPuppet.  Otherwise false, and you can offer the event to some other object. 
+   */
   boolean mouseReleased() {
     if (currentDrag == -1) {
       return false;
@@ -256,6 +311,11 @@ class StickPuppet {
     }
   }
 
+  /**
+   * To make a StickPuppet mouse controlled, call its mousePressed, mouseReleased and mouseDragged
+   * functions from the Processing functions with the same name.
+   * @return true if the mouseDragged event is relevant to the StickPuppet.  Otherwise false, and you can offer the event to some other object. 
+   */
   boolean mouseDragged() {
 
     if (currentDrag >= 0) {
@@ -275,55 +335,179 @@ class StickPuppet {
     }
   }
 
-  void tween(float t, StickFigure a, StickFigure b) {
+  /**
+   * Creates a parent-child relationship between two vertices, specified by array index.
+   * @param nChild  The array index of the child vertex in this new relationship
+   * @param nParent The array index of the parent vertex in this new relationship
+   */
+  void addChild(int nChild, int nParent) {
+    vertices.get(nParent).addChild(vertices.get(nChild));
+  }
 
-    float x = map(t, 0, 1, a.pv.x, b.pv.x);
-    float y = map(t, 0, 1, a.pv.y, b.pv.y);
+  /**
+   * Sets this StickPuppet to a pose somewhere in between the two poses given.
+   * The parameters are based on Processing's <A href="https://processing.org/reference/map_.html" target="_top">map()</A>
+   * function - in fact the only difference should be that we are not mapping to floats we are mapping to StickPuppets.
+   * @param value The incoming value to be converted
+   * @param start The lower bound of the value's current range
+   * @param stop The upper bound of the value's current range
+   * @param a The start pose
+   * @param b The end pose
+   */
+  void tween(float value, float start, float stop, StickPuppet a, StickPuppet b) {
+
+    float x = map(value, start, stop, a.pv.x, b.pv.x);
+    float y = map(value, start, stop, a.pv.y, b.pv.y);
     pv.set(x, y);
 
-    vertices.get(0).tween(t, a.vertices.get(0), b.vertices.get(0));
+    vertices.get(0).tween(value, start, stop, a.vertices.get(0), b.vertices.get(0));
 
   }
 
 };
 
 /**
- * I will write something about the StickFigure class here
+ * Stick figure animation for the Processing programming language!
  */
 class StickFigure extends StickPuppet {
 
+  /**
+   * This is the length of each of the StickFigure's segments (they're all the same).
+   * In this way, the size variable also represents this overall size of this stick figure.
+   * Call setSize() to change it.
+   * @see StickFigure#setSize
+   */
+  float size;
+
+  /** Array index of the pelvis vertex */
   static final int PELVIS = 0;
+
+  /** Array index of the left knee vertex */
   static final int LEFT_KNEE = 1;
+
+  /** Array index of the right knee vertex */
   static final int RIGHT_KNEE = 2;
+
+  /** Array index of the left foot vertex */
   static final int LEFT_FOOT = 3;
+
+  /** Array index of the right foot vertex */
   static final int RIGHT_FOOT = 4;
+
+  /** Array index of the chest vertex */
   static final int CHEST = 5;
+
+  /** Array index of the neck vertex */
   static final int NECK = 6;
+
+  /** Array index of the head vertex */
   static final int HEAD = 7;
+
+  /** Array index of the left elbow vertex */
   static final int LEFT_ELBOW = 8;
+
+  /** Array index of the right elbow vertex */
   static final int RIGHT_ELBOW = 9;
+
+  /** Array index of the left hand vertex */
   static final int LEFT_HAND = 10;
+
+  /** Array index of the right hand vertex */
   static final int RIGHT_HAND = 11;
+
+  /** Size of ArrayList */
   static final int VERTEX_COUNT = 12;
 
+  /** Convenience method.
+   *  @return pelvis vertex
+   */
   Vertex pelvis()     { return vertices.get(PELVIS);      }
+
+  /** Convenience method.
+   *  @return left knee vertex
+   */
   Vertex leftKnee()   { return vertices.get(LEFT_KNEE);   }
+
+  /** Convenience method.
+   *  @return right knee vertex
+   */
   Vertex rightKnee()  { return vertices.get(RIGHT_KNEE);  }
+
+  /** Convenience method.
+   *  @return left foot vertex
+   */
   Vertex leftFoot()   { return vertices.get(LEFT_FOOT);   }
+
+  /** Convenience method.
+   *  @return right foot vertex
+   */
   Vertex rightFoot()  { return vertices.get(RIGHT_FOOT);  }
+
+  /** Convenience method.
+   *  @return chest vertex
+   */
   Vertex chest()      { return vertices.get(CHEST);       }
+
+  /** Convenience method.
+   *  @return neck vertex
+   */
   Vertex neck()       { return vertices.get(NECK);        }
+
+  /** Convenience method.
+   *  @return head vertex
+   */
   Vertex head()       { return vertices.get(HEAD);        }
+
+  /** Convenience method.
+   *  @return left elbow vertex
+   */
   Vertex leftElbow()  { return vertices.get(LEFT_ELBOW);  }
+
+  /** Convenience method.
+   *  @return right elbow vertex
+   */
   Vertex rightElbow() { return vertices.get(RIGHT_ELBOW); }
+
+  /** Convenience method.
+   *  @return left hand vertex
+   */
   Vertex leftHand()   { return vertices.get(LEFT_HAND);   }
+
+  /** Convenience method.
+   *  @return right hand vertex
+   */
   Vertex rightHand()  { return vertices.get(RIGHT_HAND);  }
-  
+
+  /**
+   * Constructs a new stick figure of the specified size
+   * @param _size Size of the stick figure
+   * @see StickFigure#size
+   */
   StickFigure(float _size) {
     size = _size;
     reset();
 }
   
+  /**
+   * Constructs a new stick figure in the pose specified by the parameters.
+   * It is needlessly fiddly to write your own call to this constructor.
+   * Instead pose the stick figure exactly where you want it, then a call
+   * to print() will generate code for you which uses this constructor.
+   * @param _size Size of the stick figure
+   * @param _pv Position of the stick figure's pelvis (all other vertices are positioned relative to this vector)
+   * @param leftKneeHeading   The direction from the left knee to the pelvis
+   * @param rightKneeHeading  The direction from the right knee to the pelvis
+   * @param leftFootHeading   The direction from the left foot to the left knee
+   * @param rightFootHeading  The direction from the right foot to the right knee
+   * @param chestHeading      The direction from the chest to the pelvis
+   * @param neckHeading       The direction from the neck to the chest
+   * @param headHeading       The direction from the head to the neck
+   * @param leftElbowHeading  The direction from the left elbow to the neck
+   * @param rightElbowHeading The direction from the right elbow to the neck
+   * @param leftHandHeading   The direction from the left hand to the left elbow
+   * @param rightHandHeading  The direction from the right hand to the right elbow
+   * @see StickFigure#print
+   */
   StickFigure(
           float _size,
           PVector _pv,
@@ -343,7 +527,7 @@ class StickFigure extends StickPuppet {
 
     reset();
     
-    pv = _pv;
+    pv = _pv.get();
     
     leftKnee().heading   = leftKneeHeading;
     rightKnee().heading  = rightKneeHeading;
@@ -358,6 +542,10 @@ class StickFigure extends StickPuppet {
     rightHand().heading  = rightHandHeading;
   }
 
+  /**
+   * Creates the stick figure's vertex tree, connecting up all the joints.
+   * Places it in a neutral pose in the middle of the sketch.
+   */
   void reset() {
 
     vertices = new ArrayList<Vertex>();
@@ -401,10 +589,9 @@ class StickFigure extends StickPuppet {
     pelvis().rotate(-HALF_PI);
   }
 
-  void addChild(int nVertex, int nParent) {
-    vertices.get(nParent).addChild(vertices.get(nVertex));
-  }
-
+  /**
+   * Draw the stick figure.  This is what to override or hack if you want to give it a makeover or a new wardrobe.
+   */
   void draw() {
 
     pelvis().draw(pv);
@@ -431,7 +618,12 @@ class StickFigure extends StickPuppet {
 */
   }
 
-  void setSize(int _size) {
+  /**
+   * Set the length of each of the StickFigure's segments to the same value.
+   * Thus setting the overall size of this stick figure.
+   * @param _size The new size of each stick figure segment
+   */
+  void setSize(float _size) {
     size = _size;
 
     for (int n = 0; n < vertices.size(); ++n) {
@@ -439,6 +631,10 @@ class StickFigure extends StickPuppet {
     }
 }
 
+  /**
+   * Create a copy of the stick figure.
+   * @return The copy
+   */
   StickFigure copy() {
     
     return new StickFigure(
@@ -457,6 +653,11 @@ class StickFigure extends StickPuppet {
                   vertices.get(RIGHT_HAND).heading); 
   }
 
+  /**
+   * Utility method for code generation.  Pad and print a line of code followed by a comment.
+   * @param line    The line of code
+   * @param comment The comment
+   */
   void printlnWithComment(String line, String comment) {
 
     while (line.length() < 41) {
@@ -466,16 +667,31 @@ class StickFigure extends StickPuppet {
     println(line + "// " + comment);
   }
   
+  /**
+   * Utility method for code generation.  Generate a line of code which creates a new PVector.
+   * @param pv         The PVector
+   * @param lineEnding Comma if there are more parameters to come, close bracket semi-colon if this is the last parameter
+   * @param comment    The comment
+   */
   void printVector(PVector pv, String lineEnding, String comment) {
     String line = "    new PVector(" + pv.x + ", " + pv.y + ")" + lineEnding;
     printlnWithComment(line, comment);
   }
   
+  /**
+   * Utility method for code generation.  Generate an angle parameter.
+   * @param angle      The angle
+   * @param lineEnding Comma if there are more parameters to come, close bracket semi-colon if this is the last parameter
+   * @param comment    The comment
+   */
   void printAngle(float angle, String lineEnding, String comment) {
     String line = "    " + angle + lineEnding;
     printlnWithComment(line, comment);
   }
 
+  /**
+   * "Save" the stick figure's current pose by generating code for it, which can then be pasted into your sketch.
+   */
   void print() {
     println("sequence.add(new StickFigure(");
     printlnWithComment("    " + size + ",", "Size");

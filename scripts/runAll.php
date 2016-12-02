@@ -20,6 +20,24 @@ include 'makeJSSketches.php';
 // Check all copies of StickFigure.pde are the same
 //
 
+$arrStickFigure = Array();
+
+for ($nSketch = 0; $nSketch < count($namesOfSketches); ++$nSketch) {
+
+	$sketchName = $namesOfSketches[$nSketch];
+	$path = $baseDir . $sketchName . '/StickFigure.pde';
+
+	$code = file_get_contents($path);
+	array_push($arrStickFigure, $code);
+
+	if ($nSketch) {
+		if ($arrStickFigure[0] !== $arrStickFigure[n]) {
+			exit($path . ' differs.  Please reintegrate?');
+		}
+	}
+}
+
+
 //
 // Run all Java sketches
 //

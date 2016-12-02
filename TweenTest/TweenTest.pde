@@ -41,8 +41,8 @@ void draw() {
 
   if (nReturning > 0) {
     --nReturning;
-    start.tween(nReturning / nReturnSteps, initialPose, oldStart);
-    end.tween(nReturning / nReturnSteps, initialPose, oldEnd);
+    start.tween(nReturning, 0, nReturnSteps, initialPose, oldStart);
+    end.tween(nReturning, 0, nReturnSteps, initialPose, oldEnd);
   }
 
   int nColor = 0;
@@ -58,7 +58,7 @@ void draw() {
     stroke(getColor(nColor), 255, 255);
     fill(getColor(nColor), 255, 255);
     StickFigure tween = new StickFigure(50);
-    tween.tween(t, start, end);
+    tween.tween(t, 0, 1, start, end);
     tween.draw();
     ++nColor;
   }
