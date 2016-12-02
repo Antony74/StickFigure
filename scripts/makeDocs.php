@@ -70,7 +70,7 @@ $java = "import java.util.ArrayList;\n"
 
 file_put_contents($javaFilename, $java);
 
-exec( 'javadoc -cp ' . $classPath . ' -private -nodeprecatedlist -nohelp -noqualifier all -d ../docs ' . $javaFilename,
+exec( 'javadoc -cp ' . $classPath . ' -notimestamp -private -nodeprecatedlist -nohelp -noqualifier all -d ../docs ' . $javaFilename,
       $output,
       $nReturnCode);
 

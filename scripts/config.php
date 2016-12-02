@@ -10,9 +10,9 @@ $processingJavaPaths = Array(
 // Configure the location of any web-browsers you'd like to test the sketches in
 
 $webBrowserPaths = Array(
-        "C:/Program Files (x86)/Mozilla Firefox/firefox.exe",
-        "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-        "C:/Program Files (x86)/Internet Explorer/iexplore.exe");
+        "C:/PROGRA~2/MOZILL~1/firefox.exe",
+        "C:/PROGRA~2/Google/Chrome/Application/chrome.exe",
+        "C:/PROGRA~2/INTERN~1/iexplore.exe");
 
 // Configure which sketches these scripts should use
 
