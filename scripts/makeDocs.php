@@ -28,6 +28,8 @@ if ($nReturnCode !== 0) {
     exit($nReturnCode);
 }
 
+$classPath = dirname($processingJavaPaths[0]) . '/core/library/core.jar';
+
 //
 // getLine
 //
@@ -62,11 +64,13 @@ $nEnd = getLine($lines, $nEnd + 1, '};');
 $nEnd = getLine($lines, $nEnd + 1, '};');
 
 $lines = array_slice($lines, $nStart, $nEnd - $nStart + 1);
-$java = "import java.util.ArrayList;\n" . implode("\n", $lines);
+$java = "import java.util.ArrayList;\n"
+      . "import processing.core.PVector;\n"
+      . implode("\n", $lines);
 
 file_put_contents($javaFilename, $java);
 
-exec( 'javadoc -private -nodeprecatedlist -nohelp -noqualifier all -d ../docs ' . $javaFilename,
+exec( 'javadoc -cp ' . $classPath . ' -private -nodeprecatedlist -nohelp -noqualifier all -d ../docs ' . $javaFilename,
       $output,
       $nReturnCode);
 

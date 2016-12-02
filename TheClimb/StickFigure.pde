@@ -10,7 +10,7 @@ class Vertex {
 
   /**
    * An integer which is unique to this vertex.
-   * Typically an index in an ArrayList<Vertex>
+   * Typically an index in an ArrayList&gt;Vertex&lt;
    * @see StickPuppet#vertices
    */
   int index;
@@ -247,16 +247,32 @@ class Vertex {
 };
 
 /**
- * I will write something about the StickPuppet class here
+ * StickPuppet is the base-class for StickFigure, and could also be the base-class for anything non-humanoid you wanted to model
+ * in the same way (e.g. a dog, an octopus, a dragon...)
  */
 class StickPuppet {
 
-  float size;
+  /**
+   * The unique index of the vertex currently being mouse-dragged, or -1 if
+   * none of the vertices in this StickPuppet are currently being dragged.
+   */
   int currentDrag = -1;
 
+  /**
+   * Contains the x-y location within the sketch of where the StickPuppet's root vertex
+   * is (the StickFigure's root vertex is its PELVIS). 
+   */
   PVector pv;
+
+  /**
+   * Contains all the StickPuppet's vertices.  Note that the root vertex should be item zero in the ArrayList.
+   */
   ArrayList<Vertex> vertices;
 
+  /**
+   * Draws a point at each vertex so you can see what can be manipulated with the mouse
+   * (such "points" are also sometimes called lugs, handles or pivots).
+   */
   void drawPoints() {
     
     pushStyle();
@@ -269,6 +285,11 @@ class StickPuppet {
     popStyle();
   }
 
+  /**
+   * To make a StickPuppet mouse controlled, call its mousePressed, mouseReleased and mouseDragged
+   * functions from the Processing functions with the same name.
+   * @return true if the mousePressed event is relevant to the StickPuppet.  Otherwise false, and you can offer the event to some other object. 
+   */
   boolean mousePressed() {
 
     currentDrag = vertices.get(0).hitTest(pv);
@@ -276,6 +297,11 @@ class StickPuppet {
     return (currentDrag != -1);
   }
 
+  /**
+   * To make a StickPuppet mouse controlled, call its mousePressed, mouseReleased and mouseDragged
+   * functions from the Processing functions with the same name.
+   * @return true if the mouseReleased event is relevant to the StickPuppet.  Otherwise false, and you can offer the event to some other object. 
+   */
   boolean mouseReleased() {
     if (currentDrag == -1) {
       return false;
@@ -285,6 +311,11 @@ class StickPuppet {
     }
   }
 
+  /**
+   * To make a StickPuppet mouse controlled, call its mousePressed, mouseReleased and mouseDragged
+   * functions from the Processing functions with the same name.
+   * @return true if the mouseDragged event is relevant to the StickPuppet.  Otherwise false, and you can offer the event to some other object. 
+   */
   boolean mouseDragged() {
 
     if (currentDrag >= 0) {
@@ -304,7 +335,17 @@ class StickPuppet {
     }
   }
 
-  void tween(float value, float start, float stop, StickFigure a, StickFigure b) {
+  /**
+   * Sets this StickPuppet to a pose somewhere in between the two poses given.
+   * The parameters are based on Processing's <A href="https://processing.org/reference/map_.html" target="_top">map()</A>
+   * function - in fact the only difference should be that we are not mapping to floats we are mapping to StickPuppets.
+   * @param value The incoming value to be converted
+   * @param start The lower bound of the value's current range
+   * @param stop The upper bound of the value's current range
+   * @param a The start pose
+   * @param b The end pose
+   */
+  void tween(float value, float start, float stop, StickPuppet a, StickPuppet b) {
 
     float x = map(value, start, stop, a.pv.x, b.pv.x);
     float y = map(value, start, stop, a.pv.y, b.pv.y);
@@ -317,42 +358,147 @@ class StickPuppet {
 };
 
 /**
- * I will write something about the StickFigure class here
+ * Stick figure animation for the Processing programming language!
  */
 class StickFigure extends StickPuppet {
 
+  /**
+   * This is the length of each of the StickFigure's segments (they're all the same).
+   * In this way, the size variable also represents this overall size of this stick figure.
+   * Call setSize() to change it.
+   * @see StickFigure#setSize
+   */
+  float size;
+
+  /** Array index of the pelvis vertex */
   static final int PELVIS = 0;
+
+  /** Array index of the left knee vertex */
   static final int LEFT_KNEE = 1;
+
+  /** Array index of the right knee vertex */
   static final int RIGHT_KNEE = 2;
+
+  /** Array index of the left foot vertex */
   static final int LEFT_FOOT = 3;
+
+  /** Array index of the right foot vertex */
   static final int RIGHT_FOOT = 4;
+
+  /** Array index of the chest vertex */
   static final int CHEST = 5;
+
+  /** Array index of the neck vertex */
   static final int NECK = 6;
+
+  /** Array index of the head vertex */
   static final int HEAD = 7;
+
+  /** Array index of the left elbow vertex */
   static final int LEFT_ELBOW = 8;
+
+  /** Array index of the right elbow vertex */
   static final int RIGHT_ELBOW = 9;
+
+  /** Array index of the left hand vertex */
   static final int LEFT_HAND = 10;
+
+  /** Array index of the right hand vertex */
   static final int RIGHT_HAND = 11;
+
+  /** Size of ArrayList */
   static final int VERTEX_COUNT = 12;
 
+  /** Convenience method.
+   *  @return pelvis vertex
+   */
   Vertex pelvis()     { return vertices.get(PELVIS);      }
+
+  /** Convenience method.
+   *  @return left knee vertex
+   */
   Vertex leftKnee()   { return vertices.get(LEFT_KNEE);   }
+
+  /** Convenience method.
+   *  @return right knee vertex
+   */
   Vertex rightKnee()  { return vertices.get(RIGHT_KNEE);  }
+
+  /** Convenience method.
+   *  @return left foot vertex
+   */
   Vertex leftFoot()   { return vertices.get(LEFT_FOOT);   }
+
+  /** Convenience method.
+   *  @return right foot vertex
+   */
   Vertex rightFoot()  { return vertices.get(RIGHT_FOOT);  }
+
+  /** Convenience method.
+   *  @return chest vertex
+   */
   Vertex chest()      { return vertices.get(CHEST);       }
+
+  /** Convenience method.
+   *  @return neck vertex
+   */
   Vertex neck()       { return vertices.get(NECK);        }
+
+  /** Convenience method.
+   *  @return head vertex
+   */
   Vertex head()       { return vertices.get(HEAD);        }
+
+  /** Convenience method.
+   *  @return left elbow vertex
+   */
   Vertex leftElbow()  { return vertices.get(LEFT_ELBOW);  }
+
+  /** Convenience method.
+   *  @return right elbow vertex
+   */
   Vertex rightElbow() { return vertices.get(RIGHT_ELBOW); }
+
+  /** Convenience method.
+   *  @return left hand vertex
+   */
   Vertex leftHand()   { return vertices.get(LEFT_HAND);   }
+
+  /** Convenience method.
+   *  @return right hand vertex
+   */
   Vertex rightHand()  { return vertices.get(RIGHT_HAND);  }
-  
+
+  /**
+   * Constructs a new stick figure of the specified size
+   * @param _size Size of the stick figure
+   * @see StickFigure#size
+   */
   StickFigure(float _size) {
     size = _size;
     reset();
 }
   
+  /**
+   * Constructs a new stick figure in the pose specified by the parameters.
+   * It is needlessly fiddly to write your own call to this constructor.
+   * Instead pose the stick figure exactly where you want it, then a call
+   * to print() will generate code for you which uses this constructor.
+   * @param _size Size of the stick figure
+   * @param _pv Position of the stick figure's pelvis (all other vertices are positioned relative to this vector)
+   * @param leftKneeHeading   The direction from the left knee to the pelvis
+   * @param rightKneeHeading  The direction from the right knee to the pelvis
+   * @param leftFootHeading   The direction from the left foot to the left knee
+   * @param rightFootHeading  The direction from the right foot to the right knee
+   * @param chestHeading      The direction from the chest to the pelvis
+   * @param neckHeading       The direction from the neck to the chest
+   * @param headHeading       The direction from the head to the neck
+   * @param leftElbowHeading  The direction from the left elbow to the neck
+   * @param rightElbowHeading The direction from the right elbow to the neck
+   * @param leftHandHeading   The direction from the left hand to the left elbow
+   * @param rightHandHeading  The direction from the right hand to the right elbow
+   * @see StickFigure#print
+   */
   StickFigure(
           float _size,
           PVector _pv,
@@ -372,7 +518,7 @@ class StickFigure extends StickPuppet {
 
     reset();
     
-    pv = _pv;
+    pv = _pv.get();
     
     leftKnee().heading   = leftKneeHeading;
     rightKnee().heading  = rightKneeHeading;
