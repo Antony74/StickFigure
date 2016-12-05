@@ -14,7 +14,7 @@ Welcome to stick figure animation for the [Processing](https://processing.org/) 
     stroke(0);
     fill(0);
 
-    stickFigure.pv.set(150, 185); // Place the stick figure so it's slightly more central
+    stickFigure.pv.y = 185; // Place the stick figure so it's slightly more central
   }
 
   void draw() {
